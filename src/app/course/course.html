@@ -1,0 +1,86 @@
+<div class="topbar">
+  <a class="brand" routerLink="/">🇫🇷 Learn French</a>
+  <button
+    type="button"
+    class="day-toggle"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="day-picker"
+    (click)="toggleMenu()"
+  >
+    Day {{ selected()?.number ?? 1 }} <span aria-hidden="true">{{ menuOpen() ? '▴' : '▾' }}</span>
+  </button>
+</div>
+
+@if (menuOpen()) {
+  <div class="backdrop" (click)="toggleMenu()"></div>
+}
+
+<div class="layout">
+  <aside class="sidebar" id="day-picker" [class.open]="menuOpen()">
+    <a class="brand" routerLink="/">🇫🇷 <span>Learn French</span></a>
+
+    @if (plan(); as p) {
+      <div class="weeks">
+        @for (week of p.weeks; track week.number) {
+          <div class="week">
+            <h3>Week {{ week.number }} <small>{{ week.title }}</small></h3>
+            <div class="days">
+              @for (d of week.days; track d.number) {
+                <button
+                  type="button"
+                  [class.active]="d.number === selected()?.number"
+                  [attr.title]="d.title"
+                  [attr.aria-label]="'Day ' + d.number + ': ' + d.title"
+                  [attr.aria-current]="d.number === selected()?.number ? 'true' : null"
+                  (click)="select(d.number)"
+                >
+                  {{ d.number }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </aside>
+
+  <main class="content">
+    @if (!plan()) {
+      <p class="status">Loading course…</p>
+    } @else if (selected(); as day) {
+      <header>
+        <p class="eyebrow">Week {{ day.weekNumber }} · Day {{ day.number }} of 30</p>
+        <h1>{{ day.title }}</h1>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="30"
+             [attr.aria-valuenow]="day.number">
+          <span [style.width.%]="(day.number / 30) * 100"></span>
+        </div>
+      </header>
+
+      @for (s of day.sections; track s.title) {
+        <section class="card" [class]="s.kind">
+          <h2>
+            <span class="icon">{{ meta(s.kind).icon }}</span>
+            {{ s.title }}
+          </h2>
+          <div class="md" [innerHTML]="s.html"></div>
+        </section>
+      }
+
+      <nav class="pager">
+        @if (prev(); as p) {
+          <button type="button" (click)="select(p.number)">← Day {{ p.number }}</button>
+        } @else {
+          <span></span>
+        }
+        @if (next(); as n) {
+          <button type="button" class="primary" (click)="select(n.number)">
+            Day {{ n.number }} →
+          </button>
+        }
+      </nav>
+    } @else {
+      <p class="status">Could not load the course plan.</p>
+    }
+  </main>
+</div>

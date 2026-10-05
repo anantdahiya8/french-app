@@ -1,0 +1,23 @@
+<main class="hero">
+  <span class="badge">🇫🇷 30-day plan · Beginner → B1</span>
+  <h1>Learn <span>French</span></h1>
+  <p class="lead">
+    Daily grammar, vocabulary, listening and speaking practice — everything you need to hold a
+    real conversation in one month.
+  </p>
+  <div class="actions">
+    <a class="cta" routerLink="/course">Start the course →</a>
+    <a class="cta secondary" routerLink="/flashcard" [queryParams]="{ type: 'words', set: 1 }">
+      🃏 Words flashcards
+    </a>
+    <a class="cta secondary" routerLink="/flashcard" [queryParams]="{ type: 'sentences', set: 1 }">
+      💬 Sentences flashcards
+    </a>
+  </div>
+
+  <div class="stats">
+    <div><strong>30</strong><small>days</small></div>
+    <div><strong>~3h</strong><small>per day</small></div>
+    <div><strong>B1</strong><small>target level</small></div>
+  </div>
+</main>

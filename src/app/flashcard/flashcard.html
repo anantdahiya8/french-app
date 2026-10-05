@@ -1,0 +1,117 @@
+<div class="page">
+  <header class="bar">
+    <a class="home-link" routerLink="/">← Home</a>
+    <h1>Flashcards</h1>
+    <span class="spacer"></span>
+  </header>
+
+  <section class="picker">
+    <div class="tabs" role="tablist" aria-label="Deck type">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="type() === 'words'"
+        [attr.aria-selected]="type() === 'words'"
+        (click)="choose('words', set())"
+      >
+        Words
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="type() === 'sentences'"
+        [attr.aria-selected]="type() === 'sentences'"
+        (click)="choose('sentences', set())"
+      >
+        Sentences
+      </button>
+    </div>
+
+    <div class="sets" role="group" aria-label="Choose a set">
+      @for (s of sets; track s) {
+        <button
+          type="button"
+          [class.active]="set() === s"
+          [attr.aria-pressed]="set() === s"
+          (click)="choose(type(), s)"
+        >
+          <strong>Set {{ s }}</strong>
+          <small>{{ (s - 1) * 250 + 1 }}–{{ s * 250 }}</small>
+        </button>
+      }
+    </div>
+  </section>
+
+  @switch (state().status) {
+    @case ('loading') {
+      <p class="status">Loading cards…</p>
+    }
+    @case ('error') {
+      <p class="status">Could not load the flashcards.</p>
+    }
+    @default {
+      <div class="progress-row">
+        <form class="jump" (submit)="$event.preventDefault(); goTo(num)">
+          <input
+            #num
+            type="number"
+            inputmode="numeric"
+            min="1"
+            [max]="total()"
+            [value]="index() + 1"
+            (focus)="num.select()"
+            aria-label="Go to card number"
+          />
+          <span>/ {{ total() }}</span>
+          <button type="submit">Go</button>
+        </form>
+        <div class="progress" role="progressbar" aria-valuemin="0"
+             [attr.aria-valuemax]="total()" [attr.aria-valuenow]="index() + 1">
+          <span [style.width.%]="total() ? ((index() + 1) / total()) * 100 : 0"></span>
+        </div>
+      </div>
+
+      <div class="stage">
+        @for (c of visible(); track c.index) {
+          <div
+            class="card-wrap"
+            [class.dragging]="dragging()"
+            [style.transform]="dragTransform()"
+            (pointerdown)="onDown($event)"
+            (pointermove)="onMove($event)"
+            (pointerup)="onUp($event)"
+            (pointercancel)="endDrag()"
+          >
+            <div class="card" [class.flipped]="flipped()" [class.long]="type() === 'sentences'">
+              <div class="face front" [attr.aria-hidden]="flipped()">
+                <span class="label">Français</span>
+                <p class="text">{{ c.front }}</p>
+                <span class="hint">Tap to see English</span>
+              </div>
+              <div class="face back" [attr.aria-hidden]="!flipped()">
+                <span class="label">English</span>
+                <p class="text">{{ c.back }}</p>
+                <span class="hint">Tap to flip back</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="controls">
+        <button type="button" (click)="prev()" [disabled]="index() === 0" aria-label="Previous card">
+          ←
+        </button>
+        <button type="button" class="flip" (click)="flip()">
+          {{ flipped() ? 'Show French' : 'Show English' }}
+        </button>
+        <button type="button" (click)="next()" [disabled]="index() >= total() - 1"
+                aria-label="Next card">
+          →
+        </button>
+      </div>
+
+      <p class="tip">Tap the card to flip · swipe left or right to change card</p>
+    }
+  }
+</div>
